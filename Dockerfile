@@ -1,26 +1,28 @@
-# Use a larger base image with necessary dependencies (avoid slim for OpenCV)
-FROM python:3.9
+# Use an official Python runtime as a parent image
+ARG BASE_IMAGE=python:3.9
+FROM ${BASE_IMAGE}
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for OpenCV and other libraries
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file
-COPY requirements.txt .
-
 # Install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
+# Install test dependencies if provided
+ARG TEST_DEPS=""
+RUN if [ -n "$TEST_DEPS" ]; then \
+    pip install --no-cache-dir $TEST_DEPS; \
+    fi
+
+# Copy the rest of the application
 COPY . .
 
-# Expose port (adjust based on your app, e.g., 5000 for Flask, 8000 for FastAPI)
-EXPOSE 8080
-
-# Run the app
-CMD ["python", "app.py"]
+# Command to run the application
+CMD ["python", "app/main.py"]
