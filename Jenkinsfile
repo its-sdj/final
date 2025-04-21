@@ -23,7 +23,8 @@ pipeline {
                         "--build-arg ENV=production " +
                         "--build-arg TEST_DEPS='pytest pytest-cov' .")
                     
-                    docker.tag("${DOCKER_IMAGE}:${env.BUILD_ID}", "${DOCKER_IMAGE}:latest")
+                    // Alternative tagging method that doesn't require special permissions
+                    sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_ID} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -31,7 +32,9 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Run tests with coverage
+                    // Create test results directory
+                    sh 'mkdir -p test-results'
+                    
                     docker.image("${DOCKER_IMAGE}:${env.BUILD_ID}").inside {
                         sh '''
                         python -m pytest tests/ -v --cov=app --junitxml=test-results/junit.xml
@@ -54,8 +57,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-hub-credentials') {
-                        docker.push("${DOCKER_IMAGE}:${env.BUILD_ID}")
-                        docker.push("${DOCKER_IMAGE}:latest")
+                        sh "docker push ${DOCKER_IMAGE}:${env.BUILD_ID}"
+                        sh "docker push ${DOCKER_IMAGE}:latest"
                     }
                 }
             }
@@ -65,18 +68,9 @@ pipeline {
     post {
         always {
             sh 'docker system prune -f || true'
-        }
-        success {
-            slackSend(
-                channel: '#builds',
-                message: "SUCCESS: ${env.JOB_NAME} ${env.BUILD_NUMBER}\n${env.BUILD_URL}"
-            )
-        }
-        failure {
-            slackSend(
-                channel: '#builds',
-                message: "FAILED: ${env.JOB_NAME} ${env.BUILD_NUMBER}\n${env.BUILD_URL}"
-            )
+            // Basic notification alternative
+            echo "Build status: ${currentBuild.result ?: 'SUCCESS'}"
+            echo "Build URL: ${env.BUILD_URL}"
         }
     }
 }
