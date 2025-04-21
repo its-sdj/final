@@ -7,12 +7,20 @@ pipeline {
     }
 
     stages {
-        stage('Clone') {
+        // Single checkout stage
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/its-sdj/live-stream-fina-.git'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[$class: 'CleanBeforeCheckout']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/its-sdj/final.git'
+                    ]]
+                ])
             }
         }
-
+        
         stage('Build Docker') {
             steps {
                 sh 'docker pull python:3.9-slim'
