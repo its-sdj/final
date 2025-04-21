@@ -11,6 +11,14 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Debug Credentials') {
+            steps {
+                script {
+                    echo "DockerHub Username: ${env.DOCKERHUB_CREDENTIALS_USR}"
+                    sh 'echo "Credentials are set, attempting login in Push stage"'
+                }
+            }
+        }
         stage('Build') {
             steps {
                 script {
