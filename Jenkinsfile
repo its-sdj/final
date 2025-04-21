@@ -1,46 +1,36 @@
 pipeline {
     agent any
-
+    
     environment {
-        FLASK_APP = "app.py"
-        VENV_DIR = ".venv"
+        DOCKER_HUB = "your-dockerhub-username"
     }
 
     stages {
-        // Single checkout stage
         stage('Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    extensions: [[$class: 'CleanBeforeCheckout']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/its-sdj/final.git'
-                    ]]
-                ])
+                checkout scm  // This will use the repo configured in Jenkins job
             }
         }
         
-        stage('Build Docker') {
+        stage('Setup Docker') {
             steps {
-                sh 'docker pull python:3.9-slim'
-                sh 'docker build -t livestream-app .'
+                sh '''
+                    docker --version || echo "Docker not installed!"
+                    docker pull python:3.9-slim
+                '''
             }
         }
-
-        stage('Run App') {
+        
+        stage('Build') {
             steps {
-                sh 'docker run -d -p 5000:5000 livestream-app'
+                sh 'docker build -t ${DOCKER_HUB}/flask-app:${BUILD_ID} .'
             }
         }
     }
-
+    
     post {
-        always {
-            echo "Cleaning up..."
-        }
         failure {
-            echo "Build failed. Debug info:"
+            echo "Pipeline failed! Check Docker installation and repository URL."
         }
     }
 }
