@@ -1,35 +1,30 @@
-version: "3"
-
+version: '3.8'
 services:
-  webapp:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
-    volumes:
-      - .:/app
+      - "8080:8080" # Adjust port as needed
     environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=development
-      - MONGO_URI=mongodb://mongo:27017/yourdb
+      - MONGO_URI=mongodb://mongo:27017/mydb
     depends_on:
-      mongo:
-        condition: service_healthy
-    restart: unless-stopped
+      - mongo
+    networks:
+      - app-network
 
   mongo:
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - "27017:27017" # Optional: Expose to host for debugging
     volumes:
-      - mongo_data:/data/db
-    environment:
-       - MONGO_URI=mongodb://mongo:27017/livestream_db
-       - MONGO_INITDB_DATABASE=livestream_db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 30s
-      retries: 3
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  mongo_data:
+  mongo-data:
