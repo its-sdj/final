@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install test dependencies if provided
 ARG TEST_DEPS=""
 RUN if [ -n "$TEST_DEPS" ]; then \
+    echo "Installing test dependencies: $TEST_DEPS"; \
     pip install --no-cache-dir $TEST_DEPS; \
     fi
 
