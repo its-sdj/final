@@ -39,7 +39,6 @@ pipeline {
                             sh 'python -m pytest tests/ -v --cov=app --junitxml=test-results/junit.xml'
                         }
                     } else {
-                        // Windows equivalent
                         powershell """
                         mkdir test-results -Force
                         docker run --rm -v ${WORKSPACE}/test-results:/app/test-results \
@@ -77,7 +76,9 @@ pipeline {
     }
     post {
         always {
-            sh 'docker system prune -f'
+            node('') {
+                sh 'docker system prune -f'
+            }
         }
         success {
             echo 'Build status: SUCCESS'
