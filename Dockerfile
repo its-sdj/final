@@ -1,6 +1,6 @@
 # Use a base image
 FROM sdj20/final:v1
-RUN apt-get clean && apt-get update
+#RUN apt-get clean && apt-get update
 
 # Ensure /etc/apt/sources.list exists with the default Debian repository
 RUN if [ ! -f /etc/apt/sources.list ]; then \
