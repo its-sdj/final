@@ -12,15 +12,15 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Create a virtual environment and activate it
+# Create a virtual environment
 RUN python3 -m venv /venv
+
+# Set the virtual environment path to be used for installing dependencies
 ENV PATH="/venv/bin:$PATH"
+
+# Copy requirements file and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Install test dependencies (for Jenkins test stage)
 RUN pip install --no-cache-dir pytest pytest-cov
