@@ -7,3 +7,4 @@ numpy
 mss
 werkzeug
 pytest
+pytest-cov
