@@ -26,24 +26,15 @@ pipeline {
 
 
         stage('Test') {
-            steps {
-                script {
-                    sh '''
-                        # Create and activate the virtual environment
-                        python3 -m venv $VENV_DIR
-                        source $VENV_DIR/bin/activate
-
-                        # Install dependencies, including pytest and pytest-cov
-                        pip install --no-cache-dir -r requirements.txt
-                        pip install --no-cache-dir pytest pytest-cov
-
-                        # Run the tests
-                        mkdir -p test-results
-                        python3 -m pytest test_dummy.py -v --cov=app --junitxml=test-results/junit.xml
-                    '''
-                }
-            }
+    steps {
+        script {
+            sh '''
+                # Use bash to activate the virtual environment and run tests
+                /bin/bash -c "source /venv/bin/activate && pytest"
+            '''
         }
+    }
+}
 
         stage('Push') {
             steps {
