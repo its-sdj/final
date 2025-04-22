@@ -1,24 +1,18 @@
 pipeline {
     agent any
+
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         IMAGE_NAME = 'its-sdj/final'
         IMAGE_TAG = '5'
     }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage('Debug Credentials') {
-            steps {
-                script {
-                    echo "DockerHub Username: ${env.DOCKERHUB_CREDENTIALS_USR}"
-                    sh 'echo "Credentials are set, attempting login in Push stage"'
-                }
-            }
-        }
+
         stage('Build') {
             steps {
                 script {
@@ -38,6 +32,7 @@ pipeline {
                 }
             }
         }
+
         stage('Test') {
             steps {
                 script {
@@ -62,26 +57,30 @@ pipeline {
                 }
             }
         }
+
         stage('Push') {
             steps {
                 script {
-                    if (isUnix()) {
-                        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                        sh """
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${IMAGE_NAME}:latest
-                        """
-                    } else {
-                        powershell """
-                        docker login -u $env:DOCKERHUB_CREDENTIALS_USR -p $env:DOCKERHUB_CREDENTIALS_PSW
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${IMAGE_NAME}:latest
-                        """
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        if (isUnix()) {
+                            sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                            sh """
+                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                            docker push ${IMAGE_NAME}:latest
+                            """
+                        } else {
+                            powershell """
+                            docker login -u $env:DOCKER_USER -p $env:DOCKER_PASS
+                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                            docker push ${IMAGE_NAME}:latest
+                            """
+                        }
                     }
                 }
             }
         }
     }
+
     post {
         always {
             node('') {
