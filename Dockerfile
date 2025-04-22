@@ -1,8 +1,10 @@
 # Use a base image
 FROM its-sdj/final:v1
 
-# Update Debian mirror to a more reliable one
-RUN sed -i 's/http:\/\/deb.debian.org/http:\/\/ftp.debian.org/' /etc/apt/sources.list && apt-get update
+# Ensure /etc/apt/sources.list exists with the default Debian repository
+RUN if [ ! -f /etc/apt/sources.list ]; then \
+    echo "deb http://deb.debian.org/debian/ stable main" > /etc/apt/sources.list; \
+    fi && apt-get update
 
 # Install dependencies
 RUN apt-get install -y \
