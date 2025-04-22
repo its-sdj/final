@@ -1,3 +1,5 @@
+ENV http_proxy=http://172.21.3.100:8090
+ENV https_proxy=http://172.21.3.100:8090
 # Use a base image
 FROM sdj20/final:v1
 
