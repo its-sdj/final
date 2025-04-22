@@ -8,8 +8,10 @@ FROM python:3.9-slim
 # Set a working directory
 WORKDIR /app
 
-# Update and install dependencies with fix-missing flag and change the Debian mirror
-RUN sed -i 's/deb.debian.org/mirrors.kernel.org/' /etc/apt/sources.list && \
+# Ensure sources.list exists and update the sources for apt
+RUN if [ ! -f /etc/apt/sources.list ]; then \
+        echo "deb http://deb.debian.org/debian stable main" > /etc/apt/sources.list; \
+    fi && \
     apt-get update && \
     apt-get install -y --fix-missing \
     libgl1-mesa-glx \
