@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
+    python3.9-venv \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
