@@ -1,35 +1,27 @@
+# Use a base image passed as a build argument, default to python:3.9-slim if not provided
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE:-python:3.9-slim}
+
+# Configure proxy settings (required for your network)
 ENV http_proxy=http://172.21.3.100:8090
 ENV https_proxy=http://172.21.3.100:8090
-# Use a base image
-FROM sdj20/final:v1
-
-# Ensure the sources.list exists and update APT
-RUN if [ ! -f /etc/apt/sources.list ]; then \
-        echo "deb http://ftp.debian.org/debian stable main" > /etc/apt/sources.list; \
-    fi && apt-get update || echo "APT update failed, skipping..."
-
-# Install system dependencies
-RUN apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    python3-venv && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create a virtual environment
-RUN python3 -m venv /venv
+ENV no_proxy=localhost,127.0.0.1
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements file and install Python dependencies
-COPY requirements.txt .
-RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy application files
+# Copy requirements and app files
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
-# Update PATH to use the virtual environment
-ENV PATH="/venv/bin:$PATH"
-
-# Default command (optional)
+# Expose port and run
+EXPOSE 5000
 CMD ["python", "app.py"]
