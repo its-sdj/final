@@ -34,12 +34,13 @@ pipeline {
         }
 
         stage('Test') {
-    steps {
-        script {
-            sh '''
-            mkdir -p test-results
-            python -m pytest test_dummy.py -v --cov=app --junitxml=test-results/junit.xml
-                        }
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh '''
+                        mkdir -p test-results
+                        python -m pytest test_dummy.py -v --cov=app --junitxml=test-results/junit.xml
+                        '''
                     } else {
                         powershell """
                         mkdir test-results -Force
