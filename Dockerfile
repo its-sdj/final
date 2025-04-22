@@ -1,5 +1,6 @@
 # Use a base image
 FROM its-sdj/final:v1
+RUN apt-get clean && apt-get update
 
 # Ensure /etc/apt/sources.list exists with the default Debian repository
 RUN if [ ! -f /etc/apt/sources.list ]; then \
