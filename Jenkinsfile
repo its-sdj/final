@@ -39,14 +39,14 @@ pipeline {
                     if (isUnix()) {
                         sh '''
                         mkdir -p test-results
-                        python -m pytest test_dummy.py -v --cov=app --junitxml=test-results/junit.xml
+                        python3 -m pytest test_dummy.py -v --cov=app --junitxml=test-results/junit.xml
                         '''
                     } else {
                         powershell """
                         mkdir test-results -Force
                         docker run --rm -v ${WORKSPACE}/test-results:/app/test-results \
                             ${IMAGE_NAME}:${IMAGE_TAG} \
-                            python -m pytest tests/ -v --cov=app --junitxml=test-results/junit.xml
+                            python3 -m pytest tests/ -v --cov=app --junitxml=test-results/junit.xml
                         """
                     }
                 }
