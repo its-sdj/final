@@ -16,6 +16,10 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Create a virtual environment and activate it
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+
 # Install test dependencies (for Jenkins test stage)
 RUN pip install --no-cache-dir pytest pytest-cov
 
@@ -25,5 +29,5 @@ COPY . .
 # Expose the port your app runs on (Flask default is 5000; update if different)
 EXPOSE 8080
 
-# Run the app
-CMD ["python", "app.py"]
+# Run the app with the virtual environment
+CMD ["venv/bin/python", "app.py"]
