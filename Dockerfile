@@ -3,8 +3,8 @@ FROM its-sdj/final:v1
 
 # Ensure /etc/apt/sources.list exists with the default Debian repository
 RUN if [ ! -f /etc/apt/sources.list ]; then \
-    echo "deb http://deb.debian.org/debian/ stable main" > /etc/apt/sources.list; \
-    fi && apt-get update
+    echo "deb http://ftp.debian.org/debian stable main" > /etc/apt/sources.list; \
+    fi && apt-get update || echo "APT update failed, skipping..." 
 
 # Install dependencies
 RUN apt-get install -y \
