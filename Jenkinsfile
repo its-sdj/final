@@ -12,17 +12,18 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                script {
-                    sh '''
-                        # Build the Docker image
-                        docker build -t its-sdj/final:5 --build-arg ENV=production .
-                        docker tag its-sdj/final:5 its-sdj/final:latest
-                    '''
-                }
-            }
+       stage('Build') {
+    steps {
+        script {
+            sh '''
+                # Build the Docker image using the custom base image with Python installed
+                docker build --build-arg BASE_IMAGE=its-sdj/final:v1 -t its-sdj/final:5 --build-arg ENV=production .
+                docker tag its-sdj/final:5 its-sdj/final:latest
+            '''
         }
+    }
+}
+
 
         stage('Test') {
             steps {
