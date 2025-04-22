@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        VENV_DIR = '/venv'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -12,34 +8,28 @@ pipeline {
             }
         }
 
-       stage('Build') {
-    steps {
-        script {
-            sh '''
-                # Build the Docker image using the custom base image with Python installed
-                docker build --build-arg BASE_IMAGE=its-sdj/final:v1 -t its-sdj/final:5 --build-arg ENV=production .
-                docker tag its-sdj/final:5 its-sdj/final:latest
-            '''
+        stage('Build') {
+            steps {
+                script {
+                    sh 'docker build --build-arg BASE_IMAGE=its-sdj/final:v1 -t its-sdj/final:5 --build-arg ENV=production .'
+                    sh 'docker tag its-sdj/final:5 its-sdj/final:latest'
+                }
+            }
         }
-    }
-}
-
 
         stage('Test') {
-    steps {
-        script {
-            sh '''
-                # Use bash to activate the virtual environment and run tests
-                /bin/bash -c "source /venv/bin/activate && pytest"
-            '''
+            steps {
+                script {
+                    // Activate virtual environment and run pytest
+                    sh '/bin/bash -c "source /venv/bin/activate && pytest"'
+                }
+            }
         }
-    }
-}
 
         stage('Push') {
             steps {
                 script {
-                    // Push Docker image to the registry (if tests pass)
+                    // Only push if tests pass
                     sh 'docker push its-sdj/final:latest'
                 }
             }
@@ -47,15 +37,17 @@ pipeline {
 
         stage('Post Actions') {
             steps {
-                sh 'docker system prune -f'
+                echo 'Build and test completed.'
             }
         }
     }
 
     post {
         always {
-            echo "Build status: ${currentBuild.currentResult}"
-            echo "Build URL: ${env.BUILD_URL}"
+            echo "Build completed"
+        }
+        failure {
+            echo "Build failed"
         }
     }
 }
